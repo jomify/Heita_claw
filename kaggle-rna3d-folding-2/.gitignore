@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+kaggle_config/
+data/raw/
+data/interim/
+data/external/
+artifacts/*.csv
+artifacts/*.parquet
+logs/*.log
+logs/*.jsonl
+submission.csv
