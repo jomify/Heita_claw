@@ -52,15 +52,22 @@ def main() -> None:
         "dry_run": bool(args.dry_run),
     }
 
-    if args.dry_run:
-        print("[DRY RUN]", " ".join(cmd))
-    else:
-        subprocess.run(cmd, check=True)
-
-    submit_log = project_root / "logs" / "submit_history.jsonl"
-    submit_log.parent.mkdir(parents=True, exist_ok=True)
-    with submit_log.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    try:
+        if args.dry_run:
+            print("[DRY RUN]", " ".join(cmd))
+            record["status"] = "dry_run"
+        else:
+            subprocess.run(cmd, check=True)
+            record["status"] = "submitted"
+    except subprocess.CalledProcessError as e:
+        record["status"] = "failed"
+        record["error"] = str(e)
+        raise
+    finally:
+        submit_log = project_root / "logs" / "submit_history.jsonl"
+        submit_log.parent.mkdir(parents=True, exist_ok=True)
+        with submit_log.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
 if __name__ == "__main__":

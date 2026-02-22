@@ -33,6 +33,23 @@ powershell -ExecutionPolicy Bypass -File .\scripts\run_experiment.ps1 -KaggleUse
 .\.venv\Scripts\python.exe .\scripts\update_best_score.py
 ```
 
+## Immediate next iteration checklist (from current run)
+
+1. Wait for kernel `jomify/rna3d-folding2-baseline` to finish (`kaggle kernels status ...`).
+2. Download kernel output:
+   ```powershell
+   .\.venv\Scripts\kaggle.exe kernels output jomify/rna3d-folding2-baseline -p .\artifacts\kaggle_output --force
+   ```
+3. If `submission.csv` exists in output, submit it:
+   ```powershell
+   .\.venv\Scripts\python.exe .\scripts\submit.py --file artifacts/kaggle_output/submission.csv --message "kaggle-gpu-baseline-v1"
+   ```
+4. Pull score snapshot and update tracker:
+   ```powershell
+   .\.venv\Scripts\python.exe .\scripts\update_best_score.py
+   ```
+5. Launch sweep experiments (`exp-001`..`exp-006`) and keep one-variable-at-a-time changes.
+
 ## Notes
 
 - This scaffold gives a stable iterative mechanism.
