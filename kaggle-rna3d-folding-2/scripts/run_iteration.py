@@ -10,7 +10,7 @@ def run(cmd: list[str], cwd: Path) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Local CPU-only iteration (prep/validation). Use Kaggle jobs for GPU training/inference.")
     parser.add_argument("--skip-download", action="store_true")
     parser.add_argument("--submit", action="store_true")
     parser.add_argument("--message", default="baseline auto iteration")

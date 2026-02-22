@@ -1,8 +1,9 @@
 # Kaggle Pipeline: stanford-rna-3d-folding-2
 
-Automated baseline pipeline for downloading data, generating a valid submission, validating format, optional submit, and run logging.
+Default workflow is **Kaggle-side compute (GPU enabled)**.
+Local machine workflow is **CPU-only** and intended for prep/format validation.
 
-## 1) Environment setup (Windows PowerShell)
+## 1) Local setup (CPU-only prep tools)
 
 ```powershell
 cd C:\Users\86178\.openclaw\workspace\kaggle-rna3d-folding-2
@@ -10,68 +11,67 @@ powershell -ExecutionPolicy Bypass -File .\scripts\setup_env.ps1 -KaggleJsonSour
 $env:KAGGLE_CONFIG_DIR = (Resolve-Path .\kaggle_config).Path
 ```
 
-This creates `.venv`, installs dependencies (including `kaggle` CLI locally), and copies `kaggle.json` into `kaggle_config/`.
+## 2) Kaggle GPU execution path (default)
 
-## 2) Download competition data
+This pushes a Kaggle Kernel configured with `enable_gpu: true` and competition source `stanford-rna-3d-folding-2`.
 
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run_kaggle_job.ps1 -KaggleUsername "<your_kaggle_username>"
+```
+
+Files used:
+- `kaggle_kernel/main.py` (baseline train/infer logic on Kaggle runtime)
+- `kaggle_kernel/kernel-metadata.template.json` (GPU enabled)
+- `kaggle_kernel/kernel-metadata.json` (generated, ignored until created)
+
+After run completes on Kaggle:
+- output submission file is `/kaggle/working/submission.csv`
+- submit on Kaggle UI or via local `scripts/submit.py` after downloading the file.
+
+## 3) Local CPU-only mode (prep/validation only)
+
+Optional local data pull (no GPU use):
 ```powershell
 .\.venv\Scripts\python.exe .\scripts\download_data.py
 ```
 
-## 3) Build baseline submission (dry run)
-
+Build local dry-run submission:
 ```powershell
 .\.venv\Scripts\python.exe .\scripts\baseline_train_infer.py
 ```
 
-Baseline logic:
-- Uses `sample_submission` schema
-- Fills targets with global means from `train_labels` when available
-- Falls back to zeros if labels unavailable
-
-Output:
-- `artifacts/submission_dryrun.csv`
-
-## 4) Validate submission format
-
+Validate submission format:
 ```powershell
 .\.venv\Scripts\python.exe .\scripts\validate_submission.py
 ```
 
-Checks columns and row count against `data/raw/sample_submission.csv`.
+## 4) Optional submission from local file
 
-## 5) Optional submit
-
-Dry-run submit command preview:
+Dry-run:
 ```powershell
 .\.venv\Scripts\python.exe .\scripts\submit.py --file artifacts/submission_dryrun.csv --message "baseline test" --dry-run
 ```
 
-Real submit:
+Real:
 ```powershell
 .\.venv\Scripts\python.exe .\scripts\submit.py --file artifacts/submission_dryrun.csv --message "baseline test"
 ```
 
-## 6) Run one full iteration (cron/task-scheduler friendly)
+## 5) Cron/task scheduler (local orchestrator, CPU-only)
 
 ```powershell
-.\.venv\Scripts\python.exe .\scripts\run_iteration.py --dry-submit
+.\.venv\Scripts\python.exe .\scripts\run_iteration.py --skip-download --dry-submit
 ```
 
-Options:
-- `--skip-download`
-- `--submit`
-- `--dry-submit`
-- `--message "..."`
+Use this for validation/logging orchestration only. Training/inference should run on Kaggle compute.
 
 ## Logs & score tracking
 
-- `logs/runs.jsonl`: each generation run metadata
+- `logs/runs.jsonl`: generation runs
 - `logs/submit_history.jsonl`: submit attempts
-- `logs/best_score.json`: best score snapshot (maintained by `update_best_score.py`)
+- `logs/best_score.json`: best score snapshot
 
 Update best score snapshot:
-
 ```powershell
 .\.venv\Scripts\python.exe .\scripts\update_best_score.py
 ```
