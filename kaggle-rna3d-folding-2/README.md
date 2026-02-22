@@ -19,6 +19,14 @@ This pushes a Kaggle Kernel configured with `enable_gpu: true` and competition s
 powershell -ExecutionPolicy Bypass -File .\scripts\run_kaggle_job.ps1 -KaggleUsername "<your_kaggle_username>"
 ```
 
+For iterative experiments toward higher leaderboard rank, use:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run_experiment.ps1 -KaggleUsername "<your_kaggle_username>" -Slug "rna3d-exp-001" -Strategy "mean_median_blend" -BlendAlpha 0.7
+```
+
+See `EXPERIMENT_LOOP.md` for the full iteration loop.
+
 Files used:
 - `kaggle_kernel/main.py` (baseline train/infer logic on Kaggle runtime)
 - `kaggle_kernel/kernel-metadata.template.json` (GPU enabled)
